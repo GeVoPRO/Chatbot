@@ -1,4 +1,5 @@
 import random
+import re
 from tabnanny import check
 
 import telebot
@@ -18,8 +19,9 @@ def get_name(message):
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
 
     btn1 = types.KeyboardButton(  "Guess a number")
-
     markup.add(btn1)
+    btn2 = types.KeyboardButton( "Share a  phone number" )
+    markup.add(btn2)
 
 def start_game(message):
   message=bot.send_message(message.chat.id, " Guess a number Between 1 and 100:")
@@ -38,13 +40,28 @@ def check(message):
         bot.reply_to(message.chat.id, "Thats not a number")
 
 
+def create(message):
+    phone = message.text
+
+    if re.fullmatch(r"\+?\d{8,15}", phone):
+        bot.send_message(message.chat.id, f"Phone number saved: {phone}")
+    else:
+        msg = bot.send_message(message.chat.id, "Send a valid phone number :")
+        bot.register_next_step_handler(msg, create)
+
 @bot.message_handler(commands=['text'])
 def handle_text(message):
     if message.text == "Play game":
         start_game(message)
+    elif message.text == "create phone":
+        create(message)
+
     else:
         replies = (message.chat.id, "try pressing a button","hello")
         bot.reply_to(message, random.choice(replies))
+
+
+
 
 
 if __name__ == '__main__':
